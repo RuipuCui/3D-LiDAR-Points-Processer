@@ -1,6 +1,10 @@
 # 3D LiDAR Points Processor
 
-This project is currently at the first step: reading LiDAR point-cloud data from Parquet files.
+This project is currently in the early data-understanding stage:
+
+1. Read LiDAR point-cloud data from Parquet files.
+2. Print basic data summaries.
+3. Save a simple 3D plot of the point cloud.
 
 The provided data files contain 3D points with these columns:
 
@@ -15,29 +19,34 @@ Each row represents one point in the LiDAR point cloud.
 Use Python 3 and install the required packages:
 
 ```bash
-pip install pandas pyarrow
+pip install pandas pyarrow matplotlib
 ```
 
 `pandas` is used to work with table data.
 
 `pyarrow` is used by pandas to read `.parquet` files.
 
+`matplotlib` is used to create simple plots.
+
 ## How To Run
+
+Use `main.py` as the single entry point for the project.
 
 From the project folder:
 
 ```bash
 cd /Users/nolancui/3D-LiDAR-Points-Processer
-python3 read_data.py
 ```
 
-The script currently reads:
+### Read A Parquet File
 
-```text
-lidar_cable_points_easy.parquet
+Run:
+
+```bash
+python3 main.py read lidar_cable_points_easy.parquet
 ```
 
-It prints the first few rows and the total number of rows.
+This prints the first few rows and the total number of rows.
 
 Example output:
 
@@ -48,15 +57,48 @@ Example output:
 Rows: 1502
 ```
 
-## Current Code
+### Explore And Plot A Parquet File
 
-The main file is:
+Run:
 
-```text
-read_data.py
+```bash
+python3 main.py explore lidar_cable_points_easy.parquet
 ```
 
-It contains:
+This will:
+
+1. Print the number of rows.
+2. Print the column names.
+3. Print summary statistics for `x`, `y`, and `z`.
+4. Save a 3D scatter plot.
+
+For the easy file, the plot will be saved as:
+
+```text
+lidar_cable_points_easy.png
+```
+
+You can run the same script with the other files:
+
+```bash
+python3 main.py explore lidar_cable_points_medium.parquet
+python3 main.py explore lidar_cable_points_hard.parquet
+python3 main.py explore lidar_cable_points_extrahard.parquet
+```
+
+## Current Code
+
+The current code files are:
+
+```text
+main.py
+src/read_data.py
+src/explore_data.py
+```
+
+`main.py` is the only file you run directly.
+
+`src/read_data.py` contains:
 
 ```python
 read_lidar_parquet(file_path)
@@ -68,6 +110,11 @@ This function:
 2. Checks that the file contains `x`, `y`, and `z` columns.
 3. Returns the data as a pandas DataFrame.
 
+`src/explore_data.py` adds:
+
+1. Summary statistics.
+2. A 3D scatter plot saved as a `.png` file.
+
 ## Available Data Files
 
 ```text
@@ -77,15 +124,4 @@ lidar_cable_points_hard.parquet
 lidar_cable_points_extrahard.parquet
 ```
 
-To read a different file, change this line in `read_data.py`:
-
-```python
-point_cloud = read_lidar_parquet("lidar_cable_points_easy.parquet")
-```
-
-For example:
-
-```python
-point_cloud = read_lidar_parquet("lidar_cable_points_medium.parquet")
-```
-
+To read a different file, pass a different filename to `main.py`.

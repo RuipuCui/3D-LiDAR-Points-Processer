@@ -17,8 +17,3 @@ def read_lidar_parquet(file_path):
 
     return data[REQUIRED_COLUMNS]
 
-
-if __name__ == "__main__":
-    point_cloud = read_lidar_parquet("lidar_cable_points_easy.parquet")
-    print(point_cloud.head())
-    print(f"Rows: {len(point_cloud)}")
