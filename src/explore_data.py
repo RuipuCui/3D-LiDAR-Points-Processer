@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 
 
@@ -13,6 +15,9 @@ def print_summary(point_cloud, file_path):
 
 def save_3d_plot(point_cloud, output_path):
     """Save a 3D scatter plot of the LiDAR point cloud."""
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot(111, projection="3d")
 

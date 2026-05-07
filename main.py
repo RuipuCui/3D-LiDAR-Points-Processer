@@ -17,7 +17,8 @@ def explore_command(file_path):
     point_cloud = read_lidar_parquet(file_path)
     print_summary(point_cloud, file_path)
 
-    output_file = Path(file_path).with_suffix(".png")
+    input_file = Path(file_path)
+    output_file = Path("explore_images") / f"{input_file.stem}.png"
     save_3d_plot(point_cloud, output_file)
 
 

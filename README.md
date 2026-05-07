@@ -75,7 +75,7 @@ This will:
 For the easy file, the plot will be saved as:
 
 ```text
-lidar_cable_points_easy.png
+explore_images/lidar_cable_points_easy.png
 ```
 
 You can run the same script with the other files:
@@ -113,7 +113,7 @@ This function:
 `src/explore_data.py` adds:
 
 1. Summary statistics.
-2. A 3D scatter plot saved as a `.png` file.
+2. A 3D scatter plot saved in the `explore_images/` folder.
 
 ## Available Data Files
 
