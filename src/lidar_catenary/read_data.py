@@ -7,7 +7,7 @@ REQUIRED_COLUMNS = ["x", "y", "z"]
 
 
 def read_lidar_parquet(file_path):
-    """Read a LiDAR Parquet file and return a pandas DataFrame."""
+    """Read a LiDAR Parquet file and return a pandas DataFrame with x, y, z columns."""
     file_path = Path(file_path)
     data = pd.read_parquet(file_path)
 

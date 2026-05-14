@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import least_squares
 
-from src.cluster_data import cluster_point_cloud, create_local_coordinates
+from lidar_catenary.cluster_data import cluster_point_cloud, create_local_frame
 
 
 def catenary_curve(s, s0, z0, c):
@@ -61,7 +61,7 @@ def fit_single_catenary(s, z):
 def fit_catenaries_for_point_cloud(point_cloud, eps=0.35, min_samples=10):
     """Cluster a point cloud and fit one catenary to each cluster."""
     clustered_data = cluster_point_cloud(point_cloud, eps=eps, min_samples=min_samples)
-    local_points = create_local_coordinates(point_cloud)
+    local_points, center, directions = create_local_frame(point_cloud)
 
     fit_results = []
     for cluster_label in sorted(clustered_data["cluster"].unique()):
@@ -76,7 +76,7 @@ def fit_catenaries_for_point_cloud(point_cloud, eps=0.35, min_samples=10):
         fit_result["cluster"] = int(cluster_label)
         fit_results.append(fit_result)
 
-    return clustered_data, local_points, fit_results
+    return clustered_data, local_points, center, directions, fit_results
 
 
 def print_fit_summary(fit_results):
@@ -138,3 +138,76 @@ def save_fit_plot(clustered_data, local_points, fit_results, output_path):
     plt.close(fig)
 
     print(f"Saved fit plot: {output_path}")
+
+
+def reconstruct_catenary_curve_3d(clustered_data, local_points, center, directions, fit_result):
+    """Convert one fitted catenary curve back into original xyz coordinates."""
+    cluster_label = fit_result["cluster"]
+    cluster_mask = clustered_data["cluster"].to_numpy() == cluster_label
+    cluster_local_points = local_points[cluster_mask]
+
+    s_line = np.linspace(cluster_local_points[:, 0].min(), cluster_local_points[:, 0].max(), 200)
+    fitted_z = catenary_curve(s_line, fit_result["s0"], fit_result["z0"], fit_result["c"])
+
+    local_curve = np.zeros((len(s_line), 3))
+    local_curve[:, 0] = s_line
+    local_curve[:, 1] = cluster_local_points[:, 1].mean()
+    local_curve[:, 2] = cluster_local_points[:, 2].mean()
+
+    world_curve = local_curve @ directions + center
+    world_curve[:, 2] = fitted_z
+
+    return world_curve
+
+
+def save_3d_fit_plot(clustered_data, local_points, center, directions, fit_results, output_path):
+    """Save a 3D plot of clustered points with reconstructed catenary curves."""
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    fig = plt.figure(figsize=(9, 7))
+    ax = fig.add_subplot(111, projection="3d")
+    color_map = plt.get_cmap("tab10")
+
+    for result in fit_results:
+        cluster_label = result["cluster"]
+        cluster_mask = clustered_data["cluster"].to_numpy() == cluster_label
+        color = color_map(cluster_label % 10)
+
+        ax.scatter(
+            clustered_data.loc[cluster_mask, "x"],
+            clustered_data.loc[cluster_mask, "y"],
+            clustered_data.loc[cluster_mask, "z"],
+            s=5,
+            alpha=0.35,
+            color=color,
+        )
+
+        curve_points = reconstruct_catenary_curve_3d(
+            clustered_data,
+            local_points,
+            center,
+            directions,
+            result,
+        )
+        ax.plot(
+            curve_points[:, 0],
+            curve_points[:, 1],
+            curve_points[:, 2],
+            linewidth=2.5,
+            color=color,
+            label=f"cluster {cluster_label} fit",
+        )
+
+    ax.set_title("3D Reconstructed Catenary Fits")
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    ax.legend()
+
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=150)
+    plt.close(fig)
+
+    print(f"Saved 3D fit plot: {output_path}")
+

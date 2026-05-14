@@ -39,3 +39,4 @@ def save_3d_plot(point_cloud, output_path):
     plt.close(fig)
 
     print(f"Saved plot: {output_path}")
+

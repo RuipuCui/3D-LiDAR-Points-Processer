@@ -1,220 +1,188 @@
 # 3D LiDAR Points Processor
 
-This project is currently in the early data-understanding stage:
+Python package for detecting overhead electricity wires in drone LiDAR point clouds and fitting catenary models to each detected wire.
 
-1. Read LiDAR point-cloud data from Parquet files.
-2. Print basic data summaries.
-3. Save a simple 3D plot of the point cloud.
-4. Cluster points into likely wire groups.
-5. Fit catenary curves to clustered wires.
-
-The provided data files contain 3D points with these columns:
+The input files are Parquet tables with 3D point coordinates:
 
 ```text
 x, y, z
 ```
 
-Each row represents one point in the LiDAR point cloud.
+Each row is one LiDAR point.
 
-## Requirements
+## Project Pipeline
 
-Use Python 3 and install the required packages:
+The current implementation follows this pipeline:
 
-```bash
-pip install pandas pyarrow matplotlib scikit-learn scipy
-```
+1. Read LiDAR point-cloud data from Parquet files.
+2. Inspect point counts and coordinate summaries.
+3. Visualise the raw 3D point cloud.
+4. Transform points into PCA-based local coordinates.
+5. Cluster points into likely individual wires using DBSCAN.
+6. Fit one catenary curve to each detected wire cluster.
+7. Reconstruct fitted catenary curves back into original 3D space.
+8. Save plots and CSV summaries.
 
-`pandas` is used to work with table data.
-
-`pyarrow` is used by pandas to read `.parquet` files.
-
-`matplotlib` is used to create simple plots.
-
-`scikit-learn` is used for clustering.
-
-`scipy` is used for fitting catenary curves.
-
-## How To Run
-
-Use `main.py` as the single entry point for the project.
+## Setup
 
 From the project folder:
 
 ```bash
 cd /Users/nolancui/3D-LiDAR-Points-Processer
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
 ```
 
-### Read A Parquet File
-
-Run:
+This installs the package in editable mode and exposes the command:
 
 ```bash
-python3 main.py read lidar_cable_points_easy.parquet
+lidar-catenary
 ```
 
-This prints the first few rows and the total number of rows.
+## Usage
 
-Example output:
-
-```text
-          x          y          z
-0  6.196634 -13.157755  10.582272
-...
-Rows: 1502
-```
-
-### Explore And Plot A Parquet File
-
-Run:
+### Read Data
 
 ```bash
-python3 main.py explore lidar_cable_points_easy.parquet
+lidar-catenary read lidar_cable_points_easy.parquet
 ```
 
-This will:
+Prints the first few rows and row count.
 
-1. Print the number of rows.
-2. Print the column names.
-3. Print summary statistics for `x`, `y`, and `z`.
-4. Save a 3D scatter plot.
+### Explore Data
 
-For the easy file, the plot will be saved as:
+```bash
+lidar-catenary explore lidar_cable_points_easy.parquet
+```
+
+Saves a raw 3D point-cloud plot:
 
 ```text
 explore_images/lidar_cable_points_easy.png
 ```
 
-You can run the same script with the other files:
+### Cluster One File
 
 ```bash
-python3 main.py explore lidar_cable_points_medium.parquet
-python3 main.py explore lidar_cable_points_hard.parquet
-python3 main.py explore lidar_cable_points_extrahard.parquet
+lidar-catenary cluster lidar_cable_points_easy.parquet
 ```
 
-### Cluster Points Into Wires
-
-Run:
-
-```bash
-python3 main.py cluster lidar_cable_points_easy.parquet
-```
-
-This will:
-
-1. Estimate a local coordinate system from the 3D points.
-2. Use DBSCAN clustering to group nearby points.
-3. Print the number of points in each cluster.
-4. Save a colored 3D cluster plot.
-
-For the easy file, the cluster plot will be saved as:
+Saves a colored cluster plot:
 
 ```text
 cluster_images/lidar_cable_points_easy_clusters.png
 ```
 
-You can adjust the DBSCAN parameters if the clustering looks wrong:
+Optional DBSCAN parameters:
 
 ```bash
-python3 main.py cluster lidar_cable_points_easy.parquet --eps 0.4 --min-samples 10
+lidar-catenary cluster lidar_cable_points_easy.parquet --eps 0.35 --min-samples 10
 ```
 
-`eps` controls how close points must be to belong together. Larger values merge more points into clusters. Smaller values split points into more clusters or mark more points as noise.
-
-### Cluster All Data Files
-
-Run:
+### Cluster All Files
 
 ```bash
-python3 main.py cluster-all
+lidar-catenary cluster-all
 ```
 
-This runs clustering for all files matching:
+Processes all files matching:
 
 ```text
 lidar_cable_points_*.parquet
 ```
 
-It saves:
+and saves:
 
 ```text
 cluster_images/cluster_summary.csv
 ```
 
-It also saves one cluster image per input file in the `cluster_images/` folder.
+### Fit Catenary Curves For One File
 
-### Fit Catenary Curves
+```bash
+lidar-catenary fit lidar_cable_points_easy.parquet
+```
 
-Run:
+Saves:
+
+```text
+fit_images/lidar_cable_points_easy_catenary_fits.png
+fit_images/lidar_cable_points_easy_3d_catenary_fits.png
+fit_images/lidar_cable_points_easy_fit_summary.csv
+```
+
+### Fit All Files
+
+```bash
+lidar-catenary fit-all
+```
+
+Fits all files matching `lidar_cable_points_*.parquet` and saves:
+
+```text
+fit_images/fit_summary.csv
+```
+
+## Local Development Shortcut
+
+After installing dependencies, this also works from the repository root:
 
 ```bash
 python3 main.py fit lidar_cable_points_easy.parquet
 ```
 
-This will:
+`main.py` is a thin wrapper around the package CLI.
 
-1. Cluster the point cloud into likely wires.
-2. Fit one catenary curve to each detected cluster.
-3. Print the fitted parameters and RMSE error.
-4. Save a fit plot and CSV summary.
-
-For the easy file, outputs will be saved as:
+## Code Structure
 
 ```text
-fit_images/lidar_cable_points_easy_catenary_fits.png
-fit_images/lidar_cable_points_easy_fit_summary.csv
-```
-
-## Current Code
-
-The current code files are:
-
-```text
+pyproject.toml
 main.py
-src/read_data.py
-src/explore_data.py
-src/cluster_data.py
-src/fit_catenary.py
+src/
+  lidar_catenary/
+    cli.py
+    read_data.py
+    explore_data.py
+    cluster_data.py
+    fit_catenary.py
 ```
 
-`main.py` is the only file you run directly.
+Key modules:
 
-`src/read_data.py` contains:
+- `read_data.py`: reads Parquet files and validates `x`, `y`, `z` columns.
+- `explore_data.py`: prints summaries and saves raw 3D plots.
+- `cluster_data.py`: creates PCA local coordinates and clusters points with DBSCAN.
+- `fit_catenary.py`: fits catenary curves, calculates RMSE, and reconstructs fitted curves in 3D.
+- `cli.py`: command-line entry point.
 
-```python
-read_lidar_parquet(file_path)
-```
+## Algorithm Summary
 
-This function:
+The point cloud is first centered and transformed with PCA/SVD. The first local axis is treated as the dominant wire-span direction. Clustering is then performed on the two remaining local coordinates, which represent cross-section separation between wires.
 
-1. Reads a Parquet file.
-2. Checks that the file contains `x`, `y`, and `z` columns.
-3. Returns the data as a pandas DataFrame.
-
-`src/explore_data.py` adds:
-
-1. Summary statistics.
-2. A 3D scatter plot saved in the `explore_images/` folder.
-
-`src/cluster_data.py` adds:
-
-1. PCA-based local coordinates.
-2. DBSCAN clustering.
-3. A colored 3D cluster plot saved in the `cluster_images/` folder.
-
-`src/fit_catenary.py` adds:
-
-1. Catenary curve fitting for each cluster.
-2. RMSE calculation for each fitted curve.
-3. Fit plots and CSV summaries saved in the `fit_images/` folder.
-
-## Available Data Files
+For each detected cluster, the package fits:
 
 ```text
-lidar_cable_points_easy.parquet
-lidar_cable_points_medium.parquet
-lidar_cable_points_hard.parquet
-lidar_cable_points_extrahard.parquet
+z(s) = z0 + c * [cosh((s - s0) / c) - 1]
 ```
 
-To read a different file, pass a different filename to `main.py`.
+where:
+
+- `s` is local position along the wire span
+- `z` is elevation
+- `s0` is the fitted lowest-point position
+- `z0` is the fitted lowest height
+- `c` controls curvature/sag
+
+The fitted curve is then reconstructed back into original `x, y, z` space for 3D visualisation.
+
+## Data Note
+
+The provided Parquet files and original test document are assessment materials. Check `copyright.txt` before publishing or redistributing the data. A public submission should usually include code and instructions, not private assessment data, unless permission is given.
+
+## Development Checks
+
+```bash
+pytest
+ruff check .
+```

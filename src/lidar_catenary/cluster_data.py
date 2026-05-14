@@ -7,6 +7,12 @@ from sklearn.cluster import DBSCAN
 
 def create_local_coordinates(point_cloud):
     """Convert xyz points into a PCA-based local coordinate system."""
+    local_points, _, _ = create_local_frame(point_cloud)
+    return local_points
+
+
+def create_local_frame(point_cloud):
+    """Create local PCA coordinates and return data needed to convert back to xyz."""
     points = point_cloud[["x", "y", "z"]].to_numpy()
     center = points.mean(axis=0)
     centered_points = points - center
@@ -14,7 +20,7 @@ def create_local_coordinates(point_cloud):
     _, _, directions = np.linalg.svd(centered_points, full_matrices=False)
     local_points = centered_points @ directions.T
 
-    return local_points
+    return local_points, center, directions
 
 
 def cluster_point_cloud(point_cloud, eps=0.35, min_samples=10):
@@ -92,3 +98,4 @@ def save_cluster_plot(clustered_data, output_path):
     plt.close(fig)
 
     print(f"Saved cluster plot: {output_path}")
+
