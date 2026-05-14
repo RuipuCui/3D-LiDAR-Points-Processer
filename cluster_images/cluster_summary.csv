@@ -1,0 +1,5 @@
+file,total_points,wire_clusters,noise_points,cluster_counts
+lidar_cable_points_easy.parquet,1502,3,0,"{0: 492, 1: 496, 2: 514}"
+lidar_cable_points_extrahard.parquet,1201,3,0,"{0: 387, 1: 397, 2: 417}"
+lidar_cable_points_hard.parquet,601,3,0,"{0: 209, 1: 178, 2: 214}"
+lidar_cable_points_medium.parquet,2803,7,0,"{0: 401, 1: 398, 2: 421, 3: 392, 4: 401, 5: 408, 6: 382}"

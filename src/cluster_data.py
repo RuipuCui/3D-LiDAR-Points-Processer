@@ -34,9 +34,24 @@ def cluster_point_cloud(point_cloud, eps=0.35, min_samples=10):
     return clustered_data
 
 
+def get_cluster_summary(clustered_data):
+    """Return basic cluster counts for one clustered point cloud."""
+    cluster_counts = clustered_data["cluster"].value_counts().sort_index()
+    wire_count = len([label for label in cluster_counts.index if label != -1])
+    noise_points = int(cluster_counts.get(-1, 0))
+
+    return {
+        "total_points": len(clustered_data),
+        "wire_clusters": wire_count,
+        "noise_points": noise_points,
+        "cluster_counts": cluster_counts.to_dict(),
+    }
+
+
 def print_cluster_summary(clustered_data):
     """Print the number of points in each cluster."""
-    cluster_counts = clustered_data["cluster"].value_counts().sort_index()
+    summary = get_cluster_summary(clustered_data)
+    cluster_counts = summary["cluster_counts"]
 
     print("Cluster summary:")
     for cluster_label, count in cluster_counts.items():
@@ -45,8 +60,7 @@ def print_cluster_summary(clustered_data):
         else:
             print(f"Cluster {cluster_label}: {count} points")
 
-    wire_count = len([label for label in cluster_counts.index if label != -1])
-    print(f"Detected wire clusters: {wire_count}")
+    print(f"Detected wire clusters: {summary['wire_clusters']}")
 
 
 def save_cluster_plot(clustered_data, output_path):

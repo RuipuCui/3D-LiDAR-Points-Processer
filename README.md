@@ -6,6 +6,7 @@ This project is currently in the early data-understanding stage:
 2. Print basic data summaries.
 3. Save a simple 3D plot of the point cloud.
 4. Cluster points into likely wire groups.
+5. Fit catenary curves to clustered wires.
 
 The provided data files contain 3D points with these columns:
 
@@ -20,7 +21,7 @@ Each row represents one point in the LiDAR point cloud.
 Use Python 3 and install the required packages:
 
 ```bash
-pip install pandas pyarrow matplotlib scikit-learn
+pip install pandas pyarrow matplotlib scikit-learn scipy
 ```
 
 `pandas` is used to work with table data.
@@ -30,6 +31,8 @@ pip install pandas pyarrow matplotlib scikit-learn
 `matplotlib` is used to create simple plots.
 
 `scikit-learn` is used for clustering.
+
+`scipy` is used for fitting catenary curves.
 
 ## How To Run
 
@@ -118,6 +121,50 @@ python3 main.py cluster lidar_cable_points_easy.parquet --eps 0.4 --min-samples 
 
 `eps` controls how close points must be to belong together. Larger values merge more points into clusters. Smaller values split points into more clusters or mark more points as noise.
 
+### Cluster All Data Files
+
+Run:
+
+```bash
+python3 main.py cluster-all
+```
+
+This runs clustering for all files matching:
+
+```text
+lidar_cable_points_*.parquet
+```
+
+It saves:
+
+```text
+cluster_images/cluster_summary.csv
+```
+
+It also saves one cluster image per input file in the `cluster_images/` folder.
+
+### Fit Catenary Curves
+
+Run:
+
+```bash
+python3 main.py fit lidar_cable_points_easy.parquet
+```
+
+This will:
+
+1. Cluster the point cloud into likely wires.
+2. Fit one catenary curve to each detected cluster.
+3. Print the fitted parameters and RMSE error.
+4. Save a fit plot and CSV summary.
+
+For the easy file, outputs will be saved as:
+
+```text
+fit_images/lidar_cable_points_easy_catenary_fits.png
+fit_images/lidar_cable_points_easy_fit_summary.csv
+```
+
 ## Current Code
 
 The current code files are:
@@ -127,6 +174,7 @@ main.py
 src/read_data.py
 src/explore_data.py
 src/cluster_data.py
+src/fit_catenary.py
 ```
 
 `main.py` is the only file you run directly.
@@ -153,6 +201,12 @@ This function:
 1. PCA-based local coordinates.
 2. DBSCAN clustering.
 3. A colored 3D cluster plot saved in the `cluster_images/` folder.
+
+`src/fit_catenary.py` adds:
+
+1. Catenary curve fitting for each cluster.
+2. RMSE calculation for each fitted curve.
+3. Fit plots and CSV summaries saved in the `fit_images/` folder.
 
 ## Available Data Files
 
