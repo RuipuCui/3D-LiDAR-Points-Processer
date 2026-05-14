@@ -5,6 +5,7 @@ This project is currently in the early data-understanding stage:
 1. Read LiDAR point-cloud data from Parquet files.
 2. Print basic data summaries.
 3. Save a simple 3D plot of the point cloud.
+4. Cluster points into likely wire groups.
 
 The provided data files contain 3D points with these columns:
 
@@ -19,7 +20,7 @@ Each row represents one point in the LiDAR point cloud.
 Use Python 3 and install the required packages:
 
 ```bash
-pip install pandas pyarrow matplotlib
+pip install pandas pyarrow matplotlib scikit-learn
 ```
 
 `pandas` is used to work with table data.
@@ -27,6 +28,8 @@ pip install pandas pyarrow matplotlib
 `pyarrow` is used by pandas to read `.parquet` files.
 
 `matplotlib` is used to create simple plots.
+
+`scikit-learn` is used for clustering.
 
 ## How To Run
 
@@ -86,6 +89,35 @@ python3 main.py explore lidar_cable_points_hard.parquet
 python3 main.py explore lidar_cable_points_extrahard.parquet
 ```
 
+### Cluster Points Into Wires
+
+Run:
+
+```bash
+python3 main.py cluster lidar_cable_points_easy.parquet
+```
+
+This will:
+
+1. Estimate a local coordinate system from the 3D points.
+2. Use DBSCAN clustering to group nearby points.
+3. Print the number of points in each cluster.
+4. Save a colored 3D cluster plot.
+
+For the easy file, the cluster plot will be saved as:
+
+```text
+cluster_images/lidar_cable_points_easy_clusters.png
+```
+
+You can adjust the DBSCAN parameters if the clustering looks wrong:
+
+```bash
+python3 main.py cluster lidar_cable_points_easy.parquet --eps 0.4 --min-samples 10
+```
+
+`eps` controls how close points must be to belong together. Larger values merge more points into clusters. Smaller values split points into more clusters or mark more points as noise.
+
 ## Current Code
 
 The current code files are:
@@ -94,6 +126,7 @@ The current code files are:
 main.py
 src/read_data.py
 src/explore_data.py
+src/cluster_data.py
 ```
 
 `main.py` is the only file you run directly.
@@ -114,6 +147,12 @@ This function:
 
 1. Summary statistics.
 2. A 3D scatter plot saved in the `explore_images/` folder.
+
+`src/cluster_data.py` adds:
+
+1. PCA-based local coordinates.
+2. DBSCAN clustering.
+3. A colored 3D cluster plot saved in the `cluster_images/` folder.
 
 ## Available Data Files
 
