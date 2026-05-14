@@ -178,6 +178,12 @@ where:
 
 The fitted curve is then reconstructed back into original `x, y, z` space for 3D visualisation.
 
+For a full explanation of the current method, assumptions, outputs, and limitations, see:
+
+```text
+docs/APPROACH.md
+```
+
 ## Data Note
 
 The provided Parquet files and original test document are assessment materials. Check the supplied copyright notice before publishing or redistributing the data.
