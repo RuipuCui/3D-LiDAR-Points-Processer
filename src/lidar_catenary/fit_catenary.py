@@ -16,7 +16,14 @@ def catenary_curve(s, s0, z0, c):
 
 
 def fit_single_catenary(s, z):
-    """Fit one catenary curve to along-wire positions and heights."""
+    """
+    Fit one catenary curve to along-wire positions and heights.
+    s  = position along the wire span
+    z  = height/elevation
+    s0 = fitted position of the lowest point
+    z0 = fitted lowest height
+    c  = curvature/sag parameter
+    """
     if len(s) < 5:
         raise ValueError("At least 5 points are required to fit a catenary.")
 
