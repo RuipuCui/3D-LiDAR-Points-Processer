@@ -9,6 +9,9 @@ build/
 dist/
 *.egg-info/
 *.png
+*.parquet
+*.docx
+copyright.txt
 explore_images/*
 cluster_images/*
 fit_images/*

@@ -40,6 +40,8 @@ This installs the package in editable mode and exposes the command:
 lidar-catenary
 ```
 
+The package metadata and dependencies are defined in `pyproject.toml`.
+
 ## Usage
 
 ### Read Data
@@ -178,7 +180,54 @@ The fitted curve is then reconstructed back into original `x, y, z` space for 3D
 
 ## Data Note
 
-The provided Parquet files and original test document are assessment materials. Check `copyright.txt` before publishing or redistributing the data. A public submission should usually include code and instructions, not private assessment data, unless permission is given.
+The provided Parquet files and original test document are assessment materials. Check the supplied copyright notice before publishing or redistributing the data.
+
+The public repository is intended to include code and instructions, not private assessment data. Place the assessment files in the repository root before running the examples:
+
+```text
+lidar_cable_points_easy.parquet
+lidar_cable_points_medium.parquet
+lidar_cable_points_hard.parquet
+lidar_cable_points_extrahard.parquet
+```
+
+These files are ignored by Git so they can remain local.
+
+## Versioning And Releases
+
+This project uses semantic versioning:
+
+```text
+MAJOR.MINOR.PATCH
+```
+
+The current version is:
+
+```text
+0.1.0
+```
+
+Before creating a release:
+
+1. Update the version in `pyproject.toml`.
+2. Update the version in `src/lidar_catenary/__init__.py`.
+3. Add release notes to `CHANGELOG.md`.
+4. Run the development checks.
+
+Create a Git tag:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+Then create a GitHub Release from the tag.
+
+## License And Copyright
+
+The code is licensed under the MIT License. See `LICENSE`.
+
+Copyright and data-redistribution notes are in `COPYRIGHT.md`.
 
 ## Development Checks
 
@@ -186,3 +235,5 @@ The provided Parquet files and original test document are assessment materials. 
 pytest
 ruff check .
 ```
+
+The GitHub Actions workflow in `.github/workflows/tests.yml` runs the same checks on push and pull request.

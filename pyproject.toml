@@ -8,6 +8,28 @@ version = "0.1.0"
 description = "Detect overhead wires in LiDAR point clouds and fit 3D catenary models."
 readme = "README.md"
 requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Nolan Cui" },
+]
+keywords = [
+    "lidar",
+    "point-cloud",
+    "catenary",
+    "clustering",
+    "power-lines",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+]
 dependencies = [
     "matplotlib>=3.8",
     "numpy>=1.26",
@@ -26,6 +48,10 @@ dev = [
 [project.scripts]
 lidar-catenary = "lidar_catenary.cli:main"
 
+[project.urls]
+Repository = "https://github.com/nolancui/3D-LiDAR-Points-Processer"
+Issues = "https://github.com/nolancui/3D-LiDAR-Points-Processer/issues"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
@@ -33,3 +59,5 @@ where = ["src"]
 line-length = 100
 src = ["src"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
